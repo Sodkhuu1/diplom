@@ -64,9 +64,21 @@
 
     <section class="summary" id="summary" hidden>
       <h2>Measurement Summary</h2>
+      <div class="customer-grid">
+        <label>
+          Full Name
+          <input id="customer-name" type="text" maxlength="120" placeholder="Your full name" />
+        </label>
+        <label>
+          Email
+          <input id="customer-email" type="email" maxlength="200" placeholder="name@example.com" />
+        </label>
+      </div>
       <div id="summary-list"></div>
       <p id="size-suggestion"></p>
+      <p id="submit-status" class="hint"></p>
       <div class="cta-row">
+        <button id="submit-btn" class="btn primary" type="button">Submit to Tailor</button>
         <button id="print-btn" class="btn primary" type="button">Print Summary</button>
         <button id="restart-btn" class="btn ghost" type="button">Measure Again</button>
       </div>

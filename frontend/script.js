@@ -52,8 +52,11 @@
 const state = {
   index: 0,
   valuesCm: {},
-  unit: "cm"
+  unit: "cm",
+  submitting: false
 };
+
+const API_BASE_URL = "http://localhost:4000";
 
 const els = {
   unitCm: document.getElementById("unit-cm"),
@@ -73,6 +76,10 @@ const els = {
   sizeSuggestion: document.getElementById("size-suggestion"),
   printBtn: document.getElementById("print-btn"),
   restartBtn: document.getElementById("restart-btn"),
+  submitBtn: document.getElementById("submit-btn"),
+  submitStatus: document.getElementById("submit-status"),
+  customerName: document.getElementById("customer-name"),
+  customerEmail: document.getElementById("customer-email"),
   wizard: document.getElementById("wizard"),
   tape: document.getElementById("diagram-tape")
 };
@@ -175,6 +182,66 @@ function renderSummary() {
   els.summary.hidden = false;
 }
 
+function validateContact() {
+  const customerName = (els.customerName.value || "").trim();
+  const customerEmail = (els.customerEmail.value || "").trim();
+
+  if (customerName.length < 2) {
+    return { ok: false, message: "Enter your full name." };
+  }
+
+  if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(customerEmail)) {
+    return { ok: false, message: "Enter a valid email address." };
+  }
+
+  return { ok: true, customerName, customerEmail };
+}
+
+function setSubmitState(isSubmitting, message = "") {
+  state.submitting = isSubmitting;
+  els.submitBtn.disabled = isSubmitting;
+  els.submitBtn.textContent = isSubmitting ? "Submitting..." : "Submit to Tailor";
+  els.submitStatus.textContent = message;
+}
+
+async function submitMeasurements() {
+  if (state.submitting) return;
+
+  const contact = validateContact();
+  if (!contact.ok) {
+    setSubmitState(false, contact.message);
+    return;
+  }
+
+  const payload = {
+    customerName: contact.customerName,
+    customerEmail: contact.customerEmail,
+    unit: state.unit,
+    valuesCm: state.valuesCm
+  };
+
+  setSubmitState(true);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/measurements/submit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.ok) {
+      setSubmitState(false, "Submission failed. Please verify entries and try again.");
+      return;
+    }
+
+    const createdAt = new Date(data.createdAt).toLocaleString();
+    setSubmitState(false, `Submitted successfully. Reference #${data.submissionId} at ${createdAt}.`);
+  } catch (_error) {
+    setSubmitState(false, "Cannot reach backend API. Make sure server is running on port 4000.");
+  }
+}
+
 els.nextBtn.addEventListener("click", () => {
   const err = validateCurrent();
   els.error.textContent = err;
@@ -205,9 +272,13 @@ els.prevBtn.addEventListener("click", () => {
 els.unitCm.addEventListener("click", () => setUnit("cm"));
 els.unitIn.addEventListener("click", () => setUnit("in"));
 els.printBtn.addEventListener("click", () => window.print());
+els.submitBtn.addEventListener("click", submitMeasurements);
 els.restartBtn.addEventListener("click", () => {
   state.index = 0;
   state.valuesCm = {};
+  setSubmitState(false, "");
+  els.customerName.value = "";
+  els.customerEmail.value = "";
   els.summary.hidden = true;
   els.wizard.hidden = false;
   renderStep();

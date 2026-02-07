@@ -1,63 +1,78 @@
-﻿# Buryat Traditional Clothes - Diploma Web Project
+﻿# Buryat Traditional Clothes - Diploma Project Architecture
 
-This repository contains the first production-ready foundation for a diploma project website focused on Buryat traditional clothing in Mongolia.
+This project is now split into clear layers:
 
-## Project Goals
+- `frontend/` - customer-facing website (culture + guided measurements)
+- `backend/` - REST API for validation and measurement submission
+- `database/` - SQL schema and initialization scripts
 
-1. Explain the cultural meaning of clothing elements.
-2. Let buyers submit accurate measurements remotely.
-3. Reduce in-person visits to tailors through clear, guided instructions.
+## Why this separation is correct
 
-## Current Scope (Implemented)
+- Frontend can evolve UX independently.
+- Backend centralizes validation, business rules, and integrations.
+- Database preserves tailor-ready records with audit timestamps.
 
-- Landing page with project value proposition.
-- Cultural meaning page with categorized explanations.
-- Measurement page with:
-  - Step-by-step wizard
-  - Visual tape-measure style instructions
-  - Unit switch (cm / in)
-  - Validation ranges and warnings
-  - Progress bar
-  - Auto-generated tailored-size suggestion (XS-XXL)
-  - Printable summary
+## Tech choice
 
-## Suggested Diploma-Grade Roadmap
+- Frontend: HTML/CSS/Vanilla JS (fast to iterate for UX research)
+- Backend: Node.js + Express + Zod + PostgreSQL driver
+- Database: PostgreSQL (reliable relational model for real production use)
 
-### Phase 1: UX & content quality
+## Project tree
 
-- Professional photo set of each garment part.
-- Native-language support (Buryat/Mongolian + English).
-- Video snippets for difficult measurements.
+- `frontend/index.html`
+- `frontend/meaning.html`
+- `frontend/measurements.html`
+- `frontend/styles.css`
+- `frontend/script.js`
+- `backend/package.json`
+- `backend/.env.example`
+- `backend/src/server.js`
+- `backend/src/db.js`
+- `backend/src/validation.js`
+- `database/01_create_database.sql`
+- `database/02_schema.sql`
+- `docker-compose.yml`
 
-### Phase 2: Tailor operations
+## Run locally
 
-- Customer account + saved profiles.
-- Order form that binds selected garment + measurement profile.
-- Tailor dashboard to review, request re-measurements, and approve.
+### 1) Start database
 
-### Phase 3: Accuracy & trust
+```powershell
+docker compose up -d
+```
 
-- Measurement confidence score (based on consistency checks).
-- Duplicate measurement pass (take each key measure twice).
-- Device camera-assisted posture and tape placement checks.
+### 2) Start backend API
 
-### Phase 4: University defense extras
+```powershell
+cd backend
+copy .env.example .env
+npm install
+npm run dev
+```
 
-- Analytics: drop-off by step to prove UX improvements.
-- A/B tested instruction variants.
-- Report export (PDF) for both customer and tailor.
+API base URL: `http://localhost:4000`
 
-## Local Run
+### 3) Start frontend
 
-No build tools required.
+In a separate terminal:
 
-1. Open `index.html` in a browser.
-2. Navigate to the pages from the header.
+```powershell
+cd frontend
+python -m http.server 5500
+```
 
-## Structure
+Open: `http://localhost:5500/measurements.html`
 
-- `index.html` - landing and overview
-- `meaning.html` - cultural explanation content
-- `measurements.html` - guided measurement form
-- `styles.css` - shared styling
-- `script.js` - measurement logic and validation
+## Implemented backend endpoints
+
+- `GET /api/health`
+- `GET /api/measurements/definitions`
+- `POST /api/measurements/submit`
+
+## Next diploma-grade improvements
+
+1. Add authentication and customer profiles.
+2. Add tailor dashboard for approvals and re-measure requests.
+3. Store measurement images/video evidence per step.
+4. Add confidence scoring and duplicate-measure checks.
