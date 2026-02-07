@@ -1,0 +1,82 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buryat Traditional Clothes | Measurements</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">Buryat Heritage Atelier</a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="meaning.html">Clothes Meaning</a>
+      <a href="measurements.html" class="active">Measurements</a>
+    </nav>
+  </header>
+
+  <main class="measurement-main">
+    <section class="page-intro">
+      <p class="eyebrow">Remote Tailoring</p>
+      <h1>Accurate Measurement Guide</h1>
+      <p>Follow each step carefully. Keep the tape snug, not tight, and stand naturally.</p>
+    </section>
+
+    <section class="unit-switch" aria-label="Unit selection">
+      <span>Units:</span>
+      <button id="unit-cm" class="chip active" data-unit="cm">Centimeters</button>
+      <button id="unit-in" class="chip" data-unit="in">Inches</button>
+    </section>
+
+    <section class="wizard" id="wizard">
+      <div class="progress-wrap">
+        <div class="progress-bar"><span id="progress-fill"></span></div>
+        <p id="progress-text">Step 1 of 6</p>
+      </div>
+
+      <article class="measure-card" id="measure-card">
+        <h2 id="measure-title">Chest Circumference</h2>
+        <p id="measure-description"></p>
+
+        <div class="diagram" aria-hidden="true">
+          <div class="torso"></div>
+          <div class="tape" id="diagram-tape"></div>
+        </div>
+
+        <label for="measure-input" id="measure-label">Enter value</label>
+        <div class="input-row">
+          <input id="measure-input" type="number" min="0" step="0.1" placeholder="0.0" />
+          <span id="unit-label">cm</span>
+        </div>
+        <p class="hint" id="measure-hint"></p>
+        <p class="error" id="measure-error" role="alert"></p>
+
+        <div class="wizard-actions">
+          <button id="prev-btn" class="btn ghost" type="button">Previous</button>
+          <button id="next-btn" class="btn primary" type="button">Next</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="summary" id="summary" hidden>
+      <h2>Measurement Summary</h2>
+      <div id="summary-list"></div>
+      <p id="size-suggestion"></p>
+      <div class="cta-row">
+        <button id="print-btn" class="btn primary" type="button">Print Summary</button>
+        <button id="restart-btn" class="btn ghost" type="button">Measure Again</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Tip: Re-check each key value twice for best tailoring accuracy.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
