@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -16,6 +16,7 @@
       <a href="index.html">Home</a>
       <a href="meaning.html" class="active">Clothes Meaning</a>
       <a href="measurements.html">Measurements</a>
+      <a href="order-status.html">Track Order</a>
     </nav>
   </header>
 
@@ -24,43 +25,53 @@
       <p class="eyebrow">Cultural Explanation</p>
       <h1>Meaning of Buryat Traditional Clothing</h1>
       <p>
-        Traditional clothing carries social, spiritual, and environmental meaning.
-        This section gives buyers context so ordering is respectful, not only aesthetic.
+        Select a garment to explore its parts, history, and ceremonial significance.
+        Each element carries layers of identity, spirituality, and practical wisdom.
       </p>
     </section>
 
-    <section class="meaning-grid">
-      <article class="meaning-card">
-        <h2>Deel / Outer Robe</h2>
-        <p>The outer garment reflects identity, climate adaptation, and ceremonial status.</p>
-        <p><strong>Meaning:</strong> dignity, protection, and continuity of family tradition.</p>
-      </article>
+    <div class="garment-explorer">
+      <!-- Garment selector tabs -->
+      <div class="garment-tabs" role="tablist" aria-label="Garment selector">
+        <button class="garment-tab active" data-garment="deel" role="tab" aria-selected="true">Deel</button>
+        <button class="garment-tab" data-garment="malgai" role="tab" aria-selected="false">Malgai</button>
+        <button class="garment-tab" data-garment="bus" role="tab" aria-selected="false">Büs</button>
+        <button class="garment-tab" data-garment="gutal" role="tab" aria-selected="false">Gutal</button>
+        <button class="garment-tab" data-garment="accessories" role="tab" aria-selected="false">Accessories</button>
+      </div>
 
-      <article class="meaning-card">
-        <h2>Belt / Sash</h2>
-        <p>The belt is both functional and symbolic, balancing posture and garment silhouette.</p>
-        <p><strong>Meaning:</strong> discipline, readiness, and social maturity.</p>
-      </article>
+      <!-- Garment explorer panel -->
+      <div class="garment-panel">
+        <!-- Illustration placeholder (left) -->
+        <div class="garment-illustration" aria-hidden="true">
+          <div class="garment-illustration-inner" id="garment-illustration-icon">
+            <span class="garment-icon">🥻</span>
+          </div>
+          <p class="garment-subtitle" id="garment-subtitle-display"></p>
+        </div>
 
-      <article class="meaning-card">
-        <h2>Collar & Trim</h2>
-        <p>Collar shape and decorative trim can communicate region, age, and occasion.</p>
-        <p><strong>Meaning:</strong> respect, formality, and community belonging.</p>
-      </article>
+        <!-- Info + parts (right) -->
+        <div class="garment-info">
+          <h2 id="garment-name-display"></h2>
+          <p id="garment-desc-display" class="garment-overview"></p>
+          <h3 class="parts-heading">Explore garment parts</h3>
+          <ul class="parts-list" id="parts-list" role="list"></ul>
 
-      <article class="meaning-card">
-        <h2>Color & Fabric</h2>
-        <p>Material choices connect to season and mobility needs, while colors may denote mood or event type.</p>
-        <p><strong>Meaning:</strong> harmony with landscape and ceremonial intention.</p>
-      </article>
-    </section>
+          <!-- Slide-in info panel -->
+          <div class="meaning-panel" id="meaning-panel" aria-live="polite">
+            <div class="meaning-panel-inner" id="meaning-panel-inner"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <section class="ethics-note">
       <h2>Respectful Wearing Guidelines</h2>
       <ul>
         <li>Learn the event context before choosing ceremonial pieces.</li>
-        <li>Avoid mixing sacred motifs casually.</li>
-        <li>When uncertain, ask a tailor or cultural advisor.</li>
+        <li>Avoid mixing sacred motifs casually or combining elements from unrelated traditions.</li>
+        <li>When uncertain, consult a tailor or cultural advisor from the Buryat community.</li>
+        <li>Traditional garments are heirlooms — store them carefully and repair rather than replace.</li>
       </ul>
     </section>
   </main>
@@ -68,5 +79,310 @@
   <footer class="site-footer">
     <p>Educational content for cultural respect and informed custom tailoring.</p>
   </footer>
+
+  <script>
+    const GARMENTS = {
+      deel: {
+        name: "Deel",
+        subtitle: "Outer Robe",
+        icon: "🥻",
+        description: "The Deel is the central garment of Buryat traditional dress. Its cut, color, and embellishment reflect the wearer's identity, climate, and ceremonial status.",
+        parts: [
+          {
+            id: "zangi",
+            name: "Zangi",
+            english: "Collar",
+            origin: "The standing collar shape is inherited from Central Asian robe traditions and adapted to insulate against the harsh Siberian climate around Lake Baikal.",
+            meaning: "The collar height and its embroidery communicate social standing and the formality of the occasion. A high, decorated collar signals a ceremonial garment.",
+            wearing: "The collar must lie flat and close around the neck. During ceremonies, all collar buttons must be fastened — an open collar is considered disrespectful."
+          },
+          {
+            id: "engeri",
+            name: "Engeri",
+            english: "Body Skirt",
+            origin: "The wide-cut skirt panel evolved to meet the needs of nomadic life — riders required full freedom of movement on horseback across the steppe.",
+            meaning: "The generous cut symbolizes abundance and readiness. Extra fabric length historically represented prosperity and the household's wealth.",
+            wearing: "The skirt should reach at least ankle length, sweeping slightly when walking. Ceremonial Deels typically reach the floor."
+          },
+          {
+            id: "khantaaz",
+            name: "Khantaaz",
+            english: "Sleeves",
+            origin: "Extended sleeves with cuffs originally protected the hands from cold winds during outdoor work. Cuffs could be folded back when working.",
+            meaning: "Sleeve embroidery patterns may indicate the wearer's family lineage or regional origin within the Buryat territories.",
+            wearing: "Cuffs should end just past the wrist bone. Sleeves may be rolled up for manual labor but should never be shortened by cutting — that is irreversible damage."
+          },
+          {
+            id: "lining",
+            name: "Дотуур даавуу",
+            english: "Lining",
+            origin: "Traditional linings used soft cotton or wild silk to protect the outer fabric from perspiration and to add warmth without bulk.",
+            meaning: "A richly-lined Deel in silk or fine cotton signifies care, craftsmanship, and the wearer's appreciation for the garment's quality.",
+            wearing: "The lining should never be visible when the Deel is worn. Tuck at all hem and cuff edges before dressing."
+          },
+          {
+            id: "hem",
+            name: "Захын чимэг",
+            english: "Hem Banding",
+            origin: "Decorative hem banding in contrasting colors identifies regional origin — different Buryat groups use distinct pattern bands at the hem and cuffs.",
+            meaning: "Hem patterns can indicate marital status, age group, and clan affiliation. They are not purely decorative.",
+            wearing: "Inspect hem stitching annually — it is the area most exposed to wear. Commission a tailor for repairs rather than doing it yourself."
+          },
+          {
+            id: "opening",
+            name: "Голын нээлт",
+            english: "Center Opening",
+            origin: "The diagonal or center-front opening evolved from practical necessity — allowing the garment to be put on and removed quickly on horseback.",
+            meaning: "In some regional traditions, the direction of the opening (left-over-right vs. right-over-left) carries gender or status significance.",
+            wearing: "All fastenings must be closed before leaving home. An unfastened Deel is considered informal and disrespectful in ceremonial contexts."
+          }
+        ]
+      },
+      malgai: {
+        name: "Malgai",
+        subtitle: "Traditional Hat",
+        icon: "🎩",
+        description: "The Malgai is worn by both men and women, with variations in shape, height, and decoration indicating gender, age, status, and occasion.",
+        parts: [
+          {
+            id: "oroi",
+            name: "Орои",
+            english: "Crown",
+            origin: "The rounded or pointed crown shape has roots in both shamanic and Buddhist traditions of the region, representing a connection between earth and sky.",
+            meaning: "The crown direction is deeply symbolic — it must always point upward. Placing a Malgai upside down is considered a serious cultural offense.",
+            wearing: "Always place the Malgai with both hands as a sign of respect. Never toss it onto a surface or leave it face-down on the floor."
+          },
+          {
+            id: "hor",
+            name: "Хор",
+            english: "Brim",
+            origin: "Brims were functionally designed to protect the face from the intense sun on open steppe and shield the ears from wind during travel.",
+            meaning: "Brim width and material quality signal occasion — narrow brims for everyday wear, wide decorated brims for ceremony.",
+            wearing: "The brim should sit level on the forehead, one finger-width above the eyebrows. Do not tilt or reshape the brim."
+          },
+          {
+            id: "zala",
+            name: "Зала",
+            english: "Top Jewel / Finial",
+            origin: "The Zala — a jewel, knot, or tassel at the crown top — appears across Mongolian and Buryat ceremonial hats, with both Buddhist and shamanist origins.",
+            meaning: "Red and orange Zala represent the sun and spiritual energy. Blue represents the sky (Tenger). The color choice is not decorative but intentional.",
+            wearing: "The Zala must not be touched by others. It represents the wearer's spiritual crown. Handle it only when placing or removing the hat."
+          },
+          {
+            id: "liner",
+            name: "Дотуур гарц",
+            english: "Liner",
+            origin: "Felt or padded liners provided essential insulation during the extreme winters of the Baikal region, where temperatures drop well below freezing.",
+            meaning: "A well-maintained, clean liner shows the owner's respect for their cultural heritage. A deteriorated liner reflects poorly on the garment's care.",
+            wearing: "Replace the liner when it becomes worn or soiled. Never wear a Malgai without its liner in cold conditions — it damages the outer shape."
+          }
+        ]
+      },
+      bus: {
+        name: "Büs",
+        subtitle: "Belt / Sash",
+        icon: "🎗️",
+        description: "The Büs is both functional and deeply symbolic, representing discipline, readiness, and social maturity. It completes every traditional ensemble.",
+        parts: [
+          {
+            id: "fabric",
+            name: "Даавуу",
+            english: "Main Fabric",
+            origin: "Silk and wool sashes were trade goods along Silk Road networks, adopted into Buryat dress and woven with regional patterns.",
+            meaning: "Silk Büs signifies celebration and high occasions. Wool or cotton sashes are for daily wear. The choice of material signals the event.",
+            wearing: "Wind the sash clockwise around the waist, overlapping at least twice. The ends should hang symmetrically at the front."
+          },
+          {
+            id: "clasp",
+            name: "Хавчаар",
+            english: "Clasp / Buckle",
+            origin: "Metal clasps were hand-crafted by Buryat blacksmiths and passed down as family heirlooms through generations.",
+            meaning: "The clasp serves as a protective amulet — geometric patterns and animal motifs are believed to ward off misfortune and protect the wearer.",
+            wearing: "The clasp must rest at the center front. Never let it hang to the side or be worn at the back — correct positioning is required."
+          },
+          {
+            id: "embroidery",
+            name: "Хатгамал",
+            english: "Embroidery Pattern",
+            origin: "Specific embroidery patterns belong to specific families or clans and are not interchangeable between communities.",
+            meaning: "Cloud patterns represent continuity and flow. Knot patterns represent longevity. Animal patterns indicate the clan's totemic animal.",
+            wearing: "Commission embroidery only from a practitioner who knows your regional and family tradition. Using another family's pattern is inappropriate."
+          }
+        ]
+      },
+      gutal: {
+        name: "Gutal",
+        subtitle: "Traditional Boots",
+        icon: "👢",
+        description: "Gutal boots feature the distinctive upturned toe, a design evolved for riding and walking on steppe terrain. Each part carries practical and symbolic meaning.",
+        parts: [
+          {
+            id: "shakhuu",
+            name: "Шахуу",
+            english: "Upturned Toe",
+            origin: "The upturned toe prevented steppe grass from catching underfoot when walking and allowed easier insertion of the foot into stirrups when mounting.",
+            meaning: "The toe curl also carries spiritual meaning — pointing upward avoids piercing the ground and disturbing earth spirits (ezhins).",
+            wearing: "Keep toe leather conditioned with natural oil. The curl shape must be maintained during storage using a wooden last or stuffing."
+          },
+          {
+            id: "shaft",
+            name: "Голтой",
+            english: "Boot Shaft",
+            origin: "High shafts protected the lower leg from brush, rocks, and saddle friction during long horseback journeys across rough terrain.",
+            meaning: "Embroidered shafts indicate ceremonial boots. Plain or minimal shafts are for everyday use. Never wear ceremonial boots for daily work.",
+            wearing: "Pull on with both hands. Avoid forcing — shaft leather can crack at the fold if not supple. Condition before each season."
+          },
+          {
+            id: "sole",
+            name: "Ул",
+            english: "Sole",
+            origin: "Thick layered leather soles provided insulation from frozen ground and durability across thousands of kilometers of steppe travel.",
+            meaning: "New soles symbolize new beginnings — Gutal are traditionally resoled before important life events such as marriages and ceremonies.",
+            wearing: "Resole when the leather is worn through. Walking on bare or worn soles damages the upper leather structure and shortens the boot's life significantly."
+          },
+          {
+            id: "stitching",
+            name: "Оёдол",
+            english: "Decorative Stitching",
+            origin: "Stitching patterns served as maker's marks, much like a craftsman's signature, identifying both the bootmaker and the wearer's region.",
+            meaning: "Thread colors carry regional significance — red stitching for life events and celebrations, blue for spiritual occasions and ceremonies.",
+            wearing: "Inspect stitching after each use. A broken stitch should be repaired immediately — further wear will cause it to unravel along the seam."
+          }
+        ]
+      },
+      accessories: {
+        name: "Accessories",
+        subtitle: "Jewelry & Adornments",
+        icon: "📿",
+        description: "Accessories complete the traditional ensemble and carry deep personal, familial, and spiritual significance. They are not merely decorative additions.",
+        parts: [
+          {
+            id: "oikho",
+            name: "Ойхо",
+            english: "Earrings",
+            origin: "Ойхо earrings in coral, turquoise, and silver arrived via trade routes from Tibet and India, becoming central to Buryat women's adornment.",
+            meaning: "Earring style indicates marital status and age — distinct styles exist for young unmarried women, married women, and elder women.",
+            wearing: "Wear only the style appropriate to your life status. Borrowed earrings should not be worn to ceremonies — they carry the original owner's identity."
+          },
+          {
+            id: "brooch",
+            name: "Товч",
+            english: "Brooch / Clasp Pin",
+            origin: "Brooches originally fastened the Deel at the neck and chest, serving both a functional role and as a display of the household's silversmith connections.",
+            meaning: "Elaborate brooches are traditional wedding gifts and mark the wearer's position within the extended family and clan network.",
+            wearing: "Fasten at the uppermost Deel button. Center alignment is required for ceremonial occasions. A crooked brooch is considered careless."
+          },
+          {
+            id: "necklace",
+            name: "Зүүлт",
+            english: "Necklace",
+            origin: "Multi-strand necklaces of coral, turquoise, and silver beads reflect the intersection of Buddhist and shamanist protective traditions in Buryat culture.",
+            meaning: "Each material carries a distinct protective meaning — coral for vitality and health, silver for purity and clarity, turquoise for sky connection and calm.",
+            wearing: "Small necklaces are worn inside the Deel collar. Large ceremonial necklaces rest outside, visible on the chest, and are reserved for formal occasions."
+          }
+        ]
+      }
+    };
+
+    let activeGarment = "deel";
+    let activePart = null;
+
+    function renderGarment(garmentId) {
+      activeGarment = garmentId;
+      activePart = null;
+
+      const g = GARMENTS[garmentId];
+      document.getElementById("garment-name-display").textContent = g.name;
+      document.getElementById("garment-subtitle-display").textContent = g.subtitle;
+      document.getElementById("garment-desc-display").textContent = g.description;
+      document.getElementById("garment-illustration-icon").querySelector(".garment-icon").textContent = g.icon;
+
+      const list = document.getElementById("parts-list");
+      list.innerHTML = g.parts.map(p => `
+        <li>
+          <button class="part-btn" data-part="${p.id}" aria-expanded="false">
+            <span class="part-name-buryad">${p.name}</span>
+            <span class="part-name-english">${p.english}</span>
+            <span class="part-arrow">›</span>
+          </button>
+        </li>
+      `).join("");
+
+      list.querySelectorAll(".part-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const partId = btn.dataset.part;
+          if (activePart === partId) {
+            closeMeaningPanel();
+            return;
+          }
+          renderPart(garmentId, partId);
+        });
+      });
+
+      closeMeaningPanel();
+
+      // Update tab aria-selected
+      document.querySelectorAll(".garment-tab").forEach(tab => {
+        tab.classList.toggle("active", tab.dataset.garment === garmentId);
+        tab.setAttribute("aria-selected", tab.dataset.garment === garmentId ? "true" : "false");
+      });
+    }
+
+    function renderPart(garmentId, partId) {
+      activePart = partId;
+      const g = GARMENTS[garmentId];
+      const part = g.parts.find(p => p.id === partId);
+      if (!part) return;
+
+      // Update part button states
+      document.querySelectorAll(".part-btn").forEach(btn => {
+        const isActive = btn.dataset.part === partId;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-expanded", isActive ? "true" : "false");
+        btn.querySelector(".part-arrow").textContent = isActive ? "↓" : "›";
+      });
+
+      const panel = document.getElementById("meaning-panel");
+      const inner = document.getElementById("meaning-panel-inner");
+
+      inner.innerHTML = `
+        <div class="meaning-panel-header">
+          <span class="meaning-buryad">${part.name}</span>
+          <span class="meaning-english">— ${part.english}</span>
+        </div>
+        <div class="meaning-section">
+          <h4>Origin &amp; History</h4>
+          <p>${part.origin}</p>
+        </div>
+        <div class="meaning-section">
+          <h4>Ceremonial Meaning</h4>
+          <p>${part.meaning}</p>
+        </div>
+        <div class="meaning-section">
+          <h4>Wearing Guidance</h4>
+          <p>${part.wearing}</p>
+        </div>
+      `;
+
+      panel.classList.add("open");
+    }
+
+    function closeMeaningPanel() {
+      activePart = null;
+      document.querySelectorAll(".part-btn").forEach(btn => {
+        btn.classList.remove("active");
+        btn.setAttribute("aria-expanded", "false");
+        btn.querySelector(".part-arrow").textContent = "›";
+      });
+      document.getElementById("meaning-panel").classList.remove("open");
+    }
+
+    document.querySelectorAll(".garment-tab").forEach(tab => {
+      tab.addEventListener("click", () => renderGarment(tab.dataset.garment));
+    });
+
+    // Initial render
+    renderGarment("deel");
+  </script>
 </body>
 </html>

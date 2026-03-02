@@ -1,4 +1,4 @@
-﻿import pg from "pg";
+import pg from "pg";
 
 const { Pool } = pg;
 
@@ -11,7 +11,7 @@ export const pool = new Pool({
 });
 
 export async function initDb() {
-  const ddl = `
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS measurement_submissions (
       id SERIAL PRIMARY KEY,
       customer_name TEXT NOT NULL,
@@ -24,8 +24,16 @@ export async function initDb() {
       sleeve_cm NUMERIC(6,2) NOT NULL,
       height_cm NUMERIC(6,2) NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-  `;
+    )
+  `);
 
-  await pool.query(ddl);
+  // Feature 1: additional measurement columns
+  await pool.query(`ALTER TABLE measurement_submissions ADD COLUMN IF NOT EXISTS neck_cm NUMERIC(6,2)`);
+  await pool.query(`ALTER TABLE measurement_submissions ADD COLUMN IF NOT EXISTS front_length_cm NUMERIC(6,2)`);
+  await pool.query(`ALTER TABLE measurement_submissions ADD COLUMN IF NOT EXISTS wrist_cm NUMERIC(6,2)`);
+
+  // Feature 3: order status tracking columns
+  await pool.query(`ALTER TABLE measurement_submissions ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'submitted'`);
+  await pool.query(`ALTER TABLE measurement_submissions ADD COLUMN IF NOT EXISTS status_updated_at TIMESTAMPTZ`);
+  await pool.query(`ALTER TABLE measurement_submissions ADD COLUMN IF NOT EXISTS tailor_notes TEXT`);
 }

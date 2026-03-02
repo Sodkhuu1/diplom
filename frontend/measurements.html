@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -16,6 +16,7 @@
       <a href="index.html">Home</a>
       <a href="meaning.html">Clothes Meaning</a>
       <a href="measurements.html" class="active">Measurements</a>
+      <a href="order-status.html">Track Order</a>
     </nav>
   </header>
 
@@ -35,31 +36,92 @@
     <section class="wizard" id="wizard">
       <div class="progress-wrap">
         <div class="progress-bar"><span id="progress-fill"></span></div>
-        <p id="progress-text">Step 1 of 6</p>
+        <p id="progress-text">Step 1 of 9</p>
       </div>
 
-      <article class="measure-card" id="measure-card">
-        <h2 id="measure-title">Chest Circumference</h2>
-        <p id="measure-description"></p>
+      <div class="wizard-layout">
+        <!-- SVG body diagram -->
+        <div class="diagram-panel" aria-hidden="true">
+          <svg id="body-svg" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg" class="body-svg">
+            <!-- Height / Front Body Length indicators -->
+            <g id="svg-full-length" class="svg-region">
+              <rect x="1" y="1" width="5" height="318" rx="2"/>
+              <rect x="154" y="1" width="5" height="318" rx="2"/>
+              <polygon points="3.5,1 0,11 7,11"/>
+              <polygon points="156.5,1 153,11 160,11"/>
+              <polygon points="3.5,319 0,309 7,309"/>
+              <polygon points="156.5,319 153,309 160,309"/>
+            </g>
 
-        <div class="diagram" aria-hidden="true">
-          <div class="torso"></div>
-          <div class="tape" id="diagram-tape"></div>
+            <!-- Head (decorative) -->
+            <circle cx="80" cy="28" r="22" class="body-shape"/>
+
+            <!-- Neck -->
+            <g id="svg-neck" class="svg-region">
+              <rect x="67" y="51" width="26" height="19" rx="5"/>
+            </g>
+
+            <!-- Shoulders — two caps flanking the torso -->
+            <g id="svg-shoulder" class="svg-region">
+              <rect x="18" y="68" width="48" height="16" rx="7"/>
+              <rect x="94" y="68" width="48" height="16" rx="7"/>
+            </g>
+
+            <!-- Arms — outer side rects from shoulder level to pre-wrist -->
+            <g id="svg-arm" class="svg-region">
+              <rect x="8" y="68" width="14" height="84" rx="5"/>
+              <rect x="138" y="68" width="14" height="84" rx="5"/>
+            </g>
+
+            <!-- Chest — upper torso -->
+            <g id="svg-chest" class="svg-region">
+              <rect x="34" y="84" width="92" height="40" rx="5"/>
+            </g>
+
+            <!-- Waist — middle torso -->
+            <g id="svg-waist" class="svg-region">
+              <rect x="40" y="124" width="80" height="26" rx="5"/>
+            </g>
+
+            <!-- Hips — lower torso -->
+            <g id="svg-hips" class="svg-region">
+              <rect x="26" y="150" width="108" height="36" rx="5"/>
+            </g>
+
+            <!-- Wrists — bottom of arms -->
+            <g id="svg-wrist" class="svg-region">
+              <rect x="8" y="148" width="14" height="18" rx="4"/>
+              <rect x="138" y="148" width="14" height="18" rx="4"/>
+            </g>
+
+            <!-- Legs (decorative) -->
+            <rect x="36" y="186" width="36" height="130" rx="8" class="body-shape"/>
+            <rect x="88" y="186" width="36" height="130" rx="8" class="body-shape"/>
+          </svg>
+          <p class="diagram-label" id="diagram-region-label"></p>
         </div>
 
-        <label for="measure-input" id="measure-label">Enter value</label>
-        <div class="input-row">
-          <input id="measure-input" type="number" min="0" step="0.1" placeholder="0.0" />
-          <span id="unit-label">cm</span>
-        </div>
-        <p class="hint" id="measure-hint"></p>
-        <p class="error" id="measure-error" role="alert"></p>
+        <!-- Step card -->
+        <article class="measure-card" id="measure-card">
+          <h2 id="measure-title">Chest Circumference</h2>
+          <p class="body-position" id="measure-body-position"></p>
+          <p id="measure-description"></p>
+          <p class="mistake-warning" id="measure-mistake"></p>
 
-        <div class="wizard-actions">
-          <button id="prev-btn" class="btn ghost" type="button">Previous</button>
-          <button id="next-btn" class="btn primary" type="button">Next</button>
-        </div>
-      </article>
+          <label for="measure-input" id="measure-label">Enter value</label>
+          <div class="input-row">
+            <input id="measure-input" type="number" min="0" step="0.1" placeholder="0.0" />
+            <span id="unit-label">cm</span>
+          </div>
+          <p class="hint" id="measure-hint"></p>
+          <p class="error" id="measure-error" role="alert"></p>
+
+          <div class="wizard-actions">
+            <button id="prev-btn" class="btn ghost" type="button">Previous</button>
+            <button id="next-btn" class="btn primary" type="button">Next</button>
+          </div>
+        </article>
+      </div>
     </section>
 
     <section class="summary" id="summary" hidden>

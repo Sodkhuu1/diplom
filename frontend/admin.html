@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buryat Heritage Atelier | Tailor Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">Buryat Heritage Atelier</a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="meaning.html">Clothes Meaning</a>
+      <a href="measurements.html">Measurements</a>
+      <a href="order-status.html">Track Order</a>
+      <a href="admin.html" class="active admin-link">Admin</a>
+    </nav>
+  </header>
+
+  <main class="admin-main">
+    <section class="page-intro">
+      <p class="eyebrow">Tailor Dashboard</p>
+      <h1>Order Management</h1>
+      <p>All customer measurement submissions. Click a row to expand details and update status.</p>
+    </section>
+
+    <div class="admin-controls">
+      <button id="refresh-btn" class="btn ghost" type="button">↻ Refresh</button>
+      <span id="admin-status-msg" class="hint"></span>
+    </div>
+
+    <div id="orders-container">
+      <p class="hint" id="loading-msg">Loading orders…</p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>Tailor admin panel — Buryat Heritage Atelier diploma project.</p>
+  </footer>
+
+  <script>
+    const API_BASE_URL = "http://localhost:4000";
+
+    const ORDER_STATUSES = [
+      "submitted",
+      "reviewed",
+      "fabric_selected",
+      "cutting",
+      "sewing",
+      "finishing",
+      "ready",
+      "delivered"
+    ];
+
+    const MEASUREMENT_LABELS = {
+      chest_cm:        "Chest",
+      waist_cm:        "Waist",
+      hips_cm:         "Hips",
+      shoulder_cm:     "Shoulder Width",
+      sleeve_cm:       "Sleeve Length",
+      neck_cm:         "Neck",
+      front_length_cm: "Front Body Length",
+      wrist_cm:        "Wrist",
+      height_cm:       "Height"
+    };
+
+    function formatDate(iso) {
+      return new Date(iso).toLocaleString(undefined, {
+        year: "numeric", month: "short", day: "numeric",
+        hour: "2-digit", minute: "2-digit"
+      });
+    }
+
+    function statusLabel(s) {
+      return s.replace(/_/g, " ");
+    }
+
+    function buildMeasurementRows(order) {
+      return Object.entries(MEASUREMENT_LABELS)
+        .filter(([key]) => order[key] != null)
+        .map(([key, label]) => `
+          <div class="summary-row">
+            <span>${label}</span>
+            <strong>${parseFloat(order[key]).toFixed(1)} cm</strong>
+          </div>
+        `).join("");
+    }
+
+    function buildOrderRow(order) {
+      const rowId = `order-row-${order.id}`;
+      const detailId = `order-detail-${order.id}`;
+
+      const measurements = buildMeasurementRows(order);
+      const statusOptions = ORDER_STATUSES.map(s =>
+        `<option value="${s}" ${s === order.status ? "selected" : ""}>${statusLabel(s)}</option>`
+      ).join("");
+
+      return `
+        <div class="order-row" id="${rowId}">
+          <button class="order-row-summary" aria-expanded="false" aria-controls="${detailId}" data-id="${order.id}" type="button">
+            <span class="order-col order-col-id">#${order.id}</span>
+            <span class="order-col order-col-name">${order.customer_name}</span>
+            <span class="order-col order-col-email">${order.customer_email}</span>
+            <span class="order-col order-col-date">${formatDate(order.created_at)}</span>
+            <span class="order-col order-col-status status-badge status-${order.status.replace(/_/g, "-")}">${statusLabel(order.status)}</span>
+            <span class="order-col order-col-arrow">›</span>
+          </button>
+
+          <div class="order-row-detail" id="${detailId}" hidden>
+            <div class="order-detail-grid">
+              <div class="order-measurements">
+                <h4>Measurements (cm)</h4>
+                ${measurements}
+              </div>
+              <div class="order-update-form">
+                <h4>Update Status</h4>
+                <label for="status-select-${order.id}">New status</label>
+                <select id="status-select-${order.id}" class="status-select">
+                  ${statusOptions}
+                </select>
+                <label for="notes-${order.id}">Tailor notes (optional)</label>
+                <textarea id="notes-${order.id}" class="notes-textarea" placeholder="Add notes for the customer…" rows="3">${order.tailor_notes || ""}</textarea>
+                <button class="btn primary save-btn" data-id="${order.id}" type="button">Save</button>
+                <p class="save-status hint" id="save-status-${order.id}"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function buildTableHeader() {
+      return `
+        <div class="orders-table-header">
+          <span class="order-col order-col-id">#</span>
+          <span class="order-col order-col-name">Name</span>
+          <span class="order-col order-col-email">Email</span>
+          <span class="order-col order-col-date">Submitted</span>
+          <span class="order-col order-col-status">Status</span>
+          <span class="order-col order-col-arrow"></span>
+        </div>
+      `;
+    }
+
+    function attachRowHandlers() {
+      document.querySelectorAll(".order-row-summary").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.id;
+          const detail = document.getElementById(`order-detail-${id}`);
+          const isOpen = !detail.hidden;
+          detail.hidden = isOpen;
+          btn.setAttribute("aria-expanded", isOpen ? "false" : "true");
+          btn.querySelector(".order-col-arrow").textContent = isOpen ? "›" : "↓";
+        });
+      });
+
+      document.querySelectorAll(".save-btn").forEach(btn => {
+        btn.addEventListener("click", () => saveStatus(btn.dataset.id));
+      });
+    }
+
+    async function saveStatus(id) {
+      const statusEl = document.getElementById(`status-select-${id}`);
+      const notesEl = document.getElementById(`notes-${id}`);
+      const msgEl = document.getElementById(`save-status-${id}`);
+
+      const status = statusEl.value;
+      const notes = notesEl.value.trim();
+
+      msgEl.textContent = "Saving…";
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/orders/${id}/status`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status, notes: notes || undefined })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          msgEl.textContent = "Error: " + (data.message || "could not save.");
+          return;
+        }
+
+        msgEl.textContent = "Saved.";
+
+        // Update the status badge in the row summary
+        const rowSummary = document.querySelector(`[data-id="${id}"]`);
+        if (rowSummary) {
+          const badge = rowSummary.querySelector(".status-badge");
+          if (badge) {
+            badge.className = `order-col order-col-status status-badge status-${status.replace(/_/g, "-")}`;
+            badge.textContent = status.replace(/_/g, " ");
+          }
+        }
+
+        setTimeout(() => { msgEl.textContent = ""; }, 3000);
+      } catch (_e) {
+        msgEl.textContent = "Cannot reach server.";
+      }
+    }
+
+    async function loadOrders() {
+      const container = document.getElementById("orders-container");
+      const msg = document.getElementById("admin-status-msg");
+      container.innerHTML = "<p class='hint'>Loading orders…</p>";
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/admin/orders`);
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          container.innerHTML = `<p class='error'>${data.message || "Failed to load orders."}</p>`;
+          return;
+        }
+
+        if (data.orders.length === 0) {
+          container.innerHTML = "<p class='hint'>No orders yet. Submit a measurement from the measurements page to see it here.</p>";
+          return;
+        }
+
+        const rows = data.orders.map(buildOrderRow).join("");
+        container.innerHTML = `
+          <div class="orders-table">
+            ${buildTableHeader()}
+            ${rows}
+          </div>
+        `;
+
+        msg.textContent = `${data.orders.length} order${data.orders.length !== 1 ? "s" : ""} loaded.`;
+        attachRowHandlers();
+      } catch (_e) {
+        container.innerHTML = "<p class='error'>Cannot reach server. Make sure the backend is running on port 4000.</p>";
+      }
+    }
+
+    document.getElementById("refresh-btn").addEventListener("click", loadOrders);
+
+    loadOrders();
+  </script>
+</body>
+</html>

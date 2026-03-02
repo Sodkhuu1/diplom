@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buryat Traditional Clothes | Track Order</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">Buryat Heritage Atelier</a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="meaning.html">Clothes Meaning</a>
+      <a href="measurements.html">Measurements</a>
+      <a href="order-status.html" class="active">Track Order</a>
+    </nav>
+  </header>
+
+  <main class="order-status-main">
+    <section class="page-intro">
+      <p class="eyebrow">Order Progress</p>
+      <h1>Track Your Order</h1>
+      <p>Enter your reference ID or email address to check the current status of your tailoring order.</p>
+    </section>
+
+    <section class="lookup-card">
+      <div class="lookup-group">
+        <label for="lookup-id">Reference ID</label>
+        <div class="input-row">
+          <input id="lookup-id" type="number" min="1" step="1" placeholder="e.g. 42" />
+          <button id="lookup-id-btn" class="btn primary" type="button">Look Up</button>
+        </div>
+      </div>
+
+      <div class="lookup-divider"><span>— or —</span></div>
+
+      <div class="lookup-group">
+        <label for="lookup-email">Your Email</label>
+        <div class="input-row">
+          <input id="lookup-email" type="email" placeholder="name@example.com" />
+          <button id="lookup-email-btn" class="btn primary" type="button">Find Orders</button>
+        </div>
+      </div>
+
+      <p class="error" id="lookup-error" role="alert"></p>
+    </section>
+
+    <section id="order-result" hidden>
+      <!-- filled by JS -->
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Keep your reference ID safe — it is the only way to look up your specific order.</p>
+  </footer>
+
+  <script>
+    const API_BASE_URL = "http://localhost:4000";
+
+    const ORDER_STAGES = [
+      { id: "submitted",       label: "Submitted" },
+      { id: "reviewed",        label: "Reviewed" },
+      { id: "fabric_selected", label: "Fabric Selected" },
+      { id: "cutting",         label: "Cutting" },
+      { id: "sewing",          label: "Sewing" },
+      { id: "finishing",       label: "Finishing" },
+      { id: "ready",           label: "Ready" },
+      { id: "delivered",       label: "Delivered" }
+    ];
+
+    function currentStageIndex(status) {
+      return ORDER_STAGES.findIndex(s => s.id === status);
+    }
+
+    function formatDate(iso) {
+      return new Date(iso).toLocaleString(undefined, {
+        year: "numeric", month: "short", day: "numeric",
+        hour: "2-digit", minute: "2-digit"
+      });
+    }
+
+    function buildStepper(status) {
+      const current = currentStageIndex(status);
+      const steps = ORDER_STAGES.map((s, i) => {
+        const done = i < current;
+        const active = i === current;
+        return `<div class="step ${done ? "done" : ""} ${active ? "active" : ""}">
+          <div class="step-dot"></div>
+          <div class="step-label">${s.label}</div>
+        </div>`;
+      }).join("");
+      return `<div class="status-stepper">${steps}</div>`;
+    }
+
+    function buildOrderCard(order) {
+      const stepper = buildStepper(order.status);
+      const notes = order.tailor_notes
+        ? `<div class="tailor-notes"><strong>Tailor notes:</strong> ${order.tailor_notes}</div>`
+        : "";
+      const updated = order.status_updated_at
+        ? `<p class="hint">Status last updated: ${formatDate(order.status_updated_at)}</p>`
+        : "";
+
+      return `
+        <div class="order-card">
+          <div class="order-card-header">
+            <div>
+              <p class="eyebrow">Reference #${order.id}</p>
+              <p class="hint">Submitted: ${formatDate(order.created_at)}</p>
+            </div>
+            <span class="status-badge status-${order.status.replace("_", "-")}">${order.status.replace(/_/g, " ")}</span>
+          </div>
+          ${stepper}
+          ${updated}
+          ${notes}
+        </div>
+      `;
+    }
+
+    function showError(msg) {
+      document.getElementById("lookup-error").textContent = msg;
+    }
+
+    function clearError() {
+      document.getElementById("lookup-error").textContent = "";
+    }
+
+    async function lookupById(id) {
+      clearError();
+      const result = document.getElementById("order-result");
+      result.innerHTML = "<p class='hint'>Looking up order…</p>";
+      result.hidden = false;
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/orders/${id}`);
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          result.innerHTML = "";
+          result.hidden = true;
+          showError(data.message || "Order not found.");
+          return;
+        }
+        result.innerHTML = buildOrderCard(data.order);
+      } catch (_e) {
+        result.innerHTML = "";
+        result.hidden = true;
+        showError("Cannot reach server. Make sure the backend is running.");
+      }
+    }
+
+    async function lookupByEmail(email) {
+      clearError();
+      const result = document.getElementById("order-result");
+      result.innerHTML = "<p class='hint'>Looking up orders…</p>";
+      result.hidden = false;
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/orders?email=${encodeURIComponent(email)}`);
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          result.innerHTML = "";
+          result.hidden = true;
+          showError(data.message || "Could not fetch orders.");
+          return;
+        }
+        if (data.orders.length === 0) {
+          result.innerHTML = "<p class='hint'>No orders found for that email address.</p>";
+          return;
+        }
+        result.innerHTML = data.orders.map(o => buildOrderCard(o)).join("");
+      } catch (_e) {
+        result.innerHTML = "";
+        result.hidden = true;
+        showError("Cannot reach server. Make sure the backend is running.");
+      }
+    }
+
+    document.getElementById("lookup-id-btn").addEventListener("click", () => {
+      const val = document.getElementById("lookup-id").value.trim();
+      const id = parseInt(val, 10);
+      if (!val || !Number.isFinite(id) || id < 1) {
+        showError("Enter a valid reference ID (a positive number).");
+        return;
+      }
+      lookupById(id);
+    });
+
+    document.getElementById("lookup-email-btn").addEventListener("click", () => {
+      const email = document.getElementById("lookup-email").value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showError("Enter a valid email address.");
+        return;
+      }
+      lookupByEmail(email);
+    });
+
+    document.getElementById("lookup-id").addEventListener("keydown", e => {
+      if (e.key === "Enter") document.getElementById("lookup-id-btn").click();
+    });
+
+    document.getElementById("lookup-email").addEventListener("keydown", e => {
+      if (e.key === "Enter") document.getElementById("lookup-email-btn").click();
+    });
+
+    // Auto-lookup if ?id= param present in URL
+    const params = new URLSearchParams(window.location.search);
+    const paramId = parseInt(params.get("id"), 10);
+    if (Number.isFinite(paramId) && paramId > 0) {
+      document.getElementById("lookup-id").value = paramId;
+      lookupById(paramId);
+    }
+  </script>
+</body>
+</html>
